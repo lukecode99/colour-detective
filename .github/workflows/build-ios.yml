@@ -56,7 +56,7 @@ jobs:
 
       - name: Build iOS archive
         run: |
-          XCWORKSPACE=$(ls ios/*.xcworkspace | head -1)
+          XCWORKSPACE=$(find ios -maxdepth 1 -name "*.xcworkspace" -type d | head -1)
           echo "Workspace: $XCWORKSPACE"
           SCHEME=$(xcodebuild -list -workspace "$XCWORKSPACE" 2>/dev/null | awk '/Schemes:/,/^$/' | tail -n +2 | head -1 | xargs)
           echo "Using scheme: $SCHEME"
