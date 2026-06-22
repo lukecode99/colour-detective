@@ -32,14 +32,12 @@ jobs:
             console.log('metro exports patched');
           "
 
-      - name: Create getUserState shim (Expo SDK 52 / @expo/config missing export fix)
+      - name: Create getUserState shim (patch all @expo/config locations)
         run: |
           node -e "
             const path = require('path');
             const fs = require('fs');
-            const configDir = path.dirname(require.resolve('@expo/config/package.json'));
-            const shimPath = path.join(configDir, 'build', 'getUserState.js');
-            fs.mkdirSync(path.dirname(shimPath), { recursive: true });
+            const { execSync } = require('child_process');
             const code = [
               '\"use strict\";',
               'Object.defineProperty(exports, \"__esModule\", { value: true });',
@@ -55,11 +53,23 @@ jobs:
               '  };',
               '}'
             ].join(\"\n\");
-            fs.writeFileSync(shimPath, code);
-            console.log('getUserState shim created at', shimPath);
+            let locs;
+            try {
+              const out = execSync('find node_modules -name package.json -path */@expo/config/package.json 2>/dev/null', {encoding:'utf8'}).trim();
+              locs = out.split('\n').filter(Boolean).map(p2 => path.join(path.dirname(p2), 'build', 'getUserState.js'));
+            } catch(e) {
+              locs = ['node_modules/@expo/config/build/getUserState.js'];
+            }
+            for (const loc of locs) {
+              fs.mkdirSync(path.dirname(loc), { recursive: true });
+              fs.writeFileSync(loc, code);
+              console.log('Shim written:', loc);
+            }
           "
 
       - name: Prebuild iOS native project (no pod install)
+        env:
+          EXPO_NO_TELEMETRY: "1"
         run: CI=1 npx expo prebuild --platform ios --clean --no-install
 
       - name: Install CocoaPods
