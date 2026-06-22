@@ -11,7 +11,6 @@
   "dependencies": {
     "@expo/metro-runtime": "~4.0.1",
     "expo": "~52.0.0",
-    "metro": "~0.80.0",
     "expo-camera": "~16.0.0",
     "expo-image-manipulator": "~13.0.0",
     "expo-status-bar": "~2.0.0",
@@ -32,17 +31,8 @@
   "jest": {
     "testEnvironment": "node",
     "transform": {
-      "^.+\\.[jt]sx?$": [
-        "babel-jest",
-        {
-          "presets": [
-            "babel-preset-expo"
-          ]
-        }
-      ]
+      "^.+\\.[jt]sx?$": ["babel-jest", {"presets": ["babel-preset-expo"]}]
     },
-    "transformIgnorePatterns": [
-      "node_modules/(?!(pako)/)"
-    ]
+    "transformIgnorePatterns": ["node_modules/(?!(pako)/)"]
   }
 }
