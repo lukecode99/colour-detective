@@ -20,7 +20,7 @@ jobs:
           node-version: '22'
 
       - name: Install dependencies
-        run: npm ci --legacy-peer-deps
+        run: npm install --legacy-peer-deps
 
       - name: Prebuild iOS native project (no pod install)
         run: npx expo prebuild --platform ios --clean --non-interactive --no-install
