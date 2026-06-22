@@ -121,21 +121,26 @@ jobs:
 
       - name: Export IPA
         run: |
-          cat > /tmp/ExportOptions.plist << 'PLIST'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0"><dict>
-  <key>method</key><string>app-store</string>
-  <key>teamID</key><string>V628699P6F</string>
-  <key>signingStyle</key><string>manual</string>
-  <key>signingCertificate</key><string>iPhone Distribution</string>
-  <key>provisioningProfiles</key><dict>
-    <key>uk.co.colourdetective.app</key><string>08ed62a5-a1a6-450c-9a19-53ba3168ee55</string>
-  </dict>
-  <key>uploadSymbols</key><true/>
-  <key>compileBitcode</key><false/>
-</dict></plist>
-PLIST
+          node -e "
+            const fs = require('fs');
+            const xml = [
+              '<?xml version=\"1.0\" encoding=\"UTF-8\"?>',
+              '<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">',
+              '<plist version=\"1.0\"><dict>',
+              '  <key>method</key><string>app-store</string>',
+              '  <key>teamID</key><string>V628699P6F</string>',
+              '  <key>signingStyle</key><string>manual</string>',
+              '  <key>signingCertificate</key><string>iPhone Distribution</string>',
+              '  <key>provisioningProfiles</key><dict>',
+              '    <key>uk.co.colourdetective.app</key><string>08ed62a5-a1a6-450c-9a19-53ba3168ee55</string>',
+              '  </dict>',
+              '  <key>uploadSymbols</key><true/>',
+              '  <key>compileBitcode</key><false/>',
+              '</dict></plist>'
+            ].join(\"\n\");
+            fs.writeFileSync('/tmp/ExportOptions.plist', xml);
+            console.log('ExportOptions.plist written');
+          "
           ASC_KEY=~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8
           xcodebuild -exportArchive \
             -archivePath $RUNNER_TEMP/ColourDetective.xcarchive \
