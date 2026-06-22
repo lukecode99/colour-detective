@@ -58,12 +58,11 @@ jobs:
         run: |
           XCWORKSPACE=$(find ios -maxdepth 1 -name "*.xcworkspace" -type d | head -1)
           echo "Workspace: $XCWORKSPACE"
-          SCHEME=$(xcodebuild -list -workspace "$XCWORKSPACE" 2>/dev/null | awk '/Schemes:/,/^$/' | tail -n +2 | head -1 | xargs)
-          echo "Using scheme: $SCHEME"
           xcodebuild archive \
             -workspace "$XCWORKSPACE" \
-            -scheme "$SCHEME" \
+            -scheme "ColourDetective" \
             -configuration Release \
+            -destination "generic/platform=iOS" \
             -archivePath $RUNNER_TEMP/ColourDetective.xcarchive \
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="iPhone Distribution" \
@@ -80,7 +79,7 @@ jobs:
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
           <dict>
-            <key>distributionMethod</key><string>app-store-connect</string>
+            <key>method</key><string>app-store-connect</string>
             <key>teamID</key><string>${{ secrets.IOS_TEAM_ID }}</string>
             <key>signingStyle</key><string>manual</string>
             <key>signingCertificate</key><string>iPhone Distribution</string>
