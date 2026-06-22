@@ -53,9 +53,12 @@ jobs:
 
       - name: Build iOS archive
         run: |
+          SCHEME=$(xcodebuild -list -project "ios/$(ls ios/*.xcodeproj | head -1 | xargs basename)" 2>/dev/null | awk '/Schemes:/,/^$/' | tail -n +2 | head -1 | xargs)
+          echo "Using scheme: $SCHEME"
+          XCPROJ=$(ls ios/*.xcodeproj | head -1)
           xcodebuild archive \
-            -workspace ios/ColourDetective.xcodeproj/project.xcworkspace \
-            -scheme ColourDetective \
+            -workspace "$XCPROJ/project.xcworkspace" \
+            -scheme "$SCHEME" \
             -configuration Release \
             -archivePath $RUNNER_TEMP/ColourDetective.xcarchive \
             CODE_SIGN_STYLE=Manual \
@@ -97,7 +100,7 @@ jobs:
           xcrun altool \
             --upload-app \
             --type ios \
-            --file "$RUNNER_TEMP/export/ColourDetective.ipa" \
+            --file "$(ls $RUNNER_TEMP/export/*.ipa | head -1)" \
             --apiKey "${{ secrets.APP_STORE_CONNECT_KEY_ID }}" \
             --apiIssuer "${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}"
 
