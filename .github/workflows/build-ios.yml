@@ -34,28 +34,30 @@ jobs:
 
       - name: Create getUserState shim (Expo SDK 52 / @expo/config missing export fix)
         run: |
-          node << 'EOF'
-          const path = require('path');
-          const fs = require('fs');
-          const configDir = path.dirname(require.resolve('@expo/config/package.json'));
-          const shimPath = path.join(configDir, 'build', 'getUserState.js');
-          fs.mkdirSync(path.dirname(shimPath), { recursive: true });
-          // getUserState returns an object with getUserStatePath() method
-          fs.writeFileSync(shimPath, `"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUserState = getUserState;
-const path = require("path");
-const os = require("os");
-function getUserState(filename) {
-  const stateFile = path.join(os.homedir(), ".expo", filename || "state.json");
-  return {
-    getUserStatePath: function() { return stateFile; },
-    getAsync: function() { return Promise.resolve({}); },
-    setAsync: function() { return Promise.resolve(undefined); }
-  };
-}`);
-          console.log('getUserState shim updated at', shimPath);
-          EOF
+          node -e "
+            const path = require('path');
+            const fs = require('fs');
+            const configDir = path.dirname(require.resolve('@expo/config/package.json'));
+            const shimPath = path.join(configDir, 'build', 'getUserState.js');
+            fs.mkdirSync(path.dirname(shimPath), { recursive: true });
+            const code = [
+              '\"use strict\";',
+              'Object.defineProperty(exports, \"__esModule\", { value: true });',
+              'exports.getUserState = getUserState;',
+              'const p = require(\"path\");',
+              'const o = require(\"os\");',
+              'function getUserState(f) {',
+              '  const file = p.join(o.homedir(), \".expo\", f || \"state.json\");',
+              '  return {',
+              '    getUserStatePath: function() { return file; },',
+              '    getAsync: function() { return Promise.resolve({}); },',
+              '    setAsync: function() { return Promise.resolve(); }',
+              '  };',
+              '}'
+            ].join(\"\n\");
+            fs.writeFileSync(shimPath, code);
+            console.log('getUserState shim created at', shimPath);
+          "
 
       - name: Prebuild iOS native project (no pod install)
         run: CI=1 npx expo prebuild --platform ios --clean --no-install
