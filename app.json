@@ -30,12 +30,6 @@
     "plugins": [
       "expo-camera"
     ],
-    "updates": {
-      "url": "https://u.expo.dev/aa06313f-dc9d-4ec9-a724-c885adf4f1e3"
-    },
-    "runtimeVersion": {
-      "policy": "sdkVersion"
-    },
     "extra": {
       "eas": {
         "projectId": "aa06313f-dc9d-4ec9-a724-c885adf4f1e3"
