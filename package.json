@@ -9,6 +9,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@expo/config": "~10.0.11",
     "@expo/metro-runtime": "~4.0.1",
     "expo": "~52.0.0",
     "expo-camera": "~16.0.0",
