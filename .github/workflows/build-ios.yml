@@ -53,11 +53,12 @@ jobs:
 
       - name: Build iOS archive
         run: |
-          SCHEME=$(xcodebuild -list -project "ios/$(ls ios/*.xcodeproj | head -1 | xargs basename)" 2>/dev/null | awk '/Schemes:/,/^$/' | tail -n +2 | head -1 | xargs)
+          XCWORKSPACE=$(ls ios/*.xcworkspace | head -1)
+          echo "Workspace: $XCWORKSPACE"
+          SCHEME=$(xcodebuild -list -workspace "$XCWORKSPACE" 2>/dev/null | awk '/Schemes:/,/^$/' | tail -n +2 | head -1 | xargs)
           echo "Using scheme: $SCHEME"
-          XCPROJ=$(ls ios/*.xcodeproj | head -1)
           xcodebuild archive \
-            -workspace "$XCPROJ/project.xcworkspace" \
+            -workspace "$XCWORKSPACE" \
             -scheme "$SCHEME" \
             -configuration Release \
             -archivePath $RUNNER_TEMP/ColourDetective.xcarchive \
