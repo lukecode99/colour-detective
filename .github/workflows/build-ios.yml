@@ -32,8 +32,34 @@ jobs:
             console.log('metro exports patched');
           "
 
+      - name: Create getUserState shim (Expo SDK 52 / @expo/config missing export fix)
+        run: |
+          node << 'EOF'
+          const path = require('path');
+          const fs = require('fs');
+          const configDir = path.dirname(require.resolve('@expo/config/package.json'));
+          const buildDir = path.join(configDir, 'build');
+          const shimPath = path.join(buildDir, 'getUserState.js');
+          if (!fs.existsSync(shimPath)) {
+            fs.mkdirSync(buildDir, { recursive: true });
+            fs.writeFileSync(shimPath, [
+              '"use strict";',
+              'Object.defineProperty(exports, "__esModule", { value: true });',
+              'exports.getUserState = getUserState;',
+              'const path = require("path");',
+              'const os = require("os");',
+              'function getUserState(filename) {',
+              '  return path.join(os.homedir(), ".expo", filename || "state.json");',
+              '}'
+            ].join('\n'));
+            console.log('getUserState shim created at', shimPath);
+          } else {
+            console.log('getUserState already exists at', shimPath);
+          }
+          EOF
+
       - name: Prebuild iOS native project (no pod install)
-        run: npx expo prebuild --platform ios --clean --non-interactive --no-install
+        run: CI=1 npx expo prebuild --platform ios --clean --no-install
 
       - name: Install CocoaPods
         run: cd ios && pod install --repo-update
