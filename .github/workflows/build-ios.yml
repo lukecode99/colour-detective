@@ -22,8 +22,21 @@ jobs:
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
 
-      - name: Prebuild iOS native project
-        run: npx expo prebuild --platform ios --clean --non-interactive
+      - name: Prebuild iOS native project (no pod install)
+        run: npx expo prebuild --platform ios --clean --non-interactive --no-install
+
+      - name: Fix Podfile - add ReactAppDependencyProvider local path
+        run: |
+          PODFILE="ios/Podfile"
+          if ! grep -q "ReactAppDependencyProvider" "$PODFILE"; then
+            echo "Patching Podfile to add ReactAppDependencyProvider..."
+            sed -i '' "s|  use_expo_modules!|  use_expo_modules!\n  pod 'ReactAppDependencyProvider', :path => '../node_modules/react-native/Libraries/AppDelegate'|" "$PODFILE"
+          fi
+          echo "--- Relevant Podfile lines ---"
+          grep -n "ReactAppDependencyProvider\|use_expo_modules\|use_react_native" "$PODFILE"
+
+      - name: Install CocoaPods
+        run: cd ios && pod install --repo-update
 
       - name: Import certificate
         run: |
